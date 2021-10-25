@@ -12,8 +12,8 @@ import {
 } from 'akeneo-design-system';
 import {Link, useRouteMatch} from 'react-router-dom';
 import styled from 'styled-components';
-import {getReportFromFolder, Report} from "../model/Report";
-import {NodeSummary} from "./NodeSummary";
+import {getReportFromFolder, Report} from '../model/Report';
+import {NodeSummary} from './NodeSummary';
 
 const canCopyToClipboard = (): boolean => 'clipboard' in navigator;
 
@@ -60,15 +60,12 @@ const NodeReport = ({report}: NodeReportProps) => {
   return (
     <>
       <Breadcrumb>
-        <Breadcrumb.Step href="/">
-          Root
-        </Breadcrumb.Step>
+        <Breadcrumb.Step href="#/">Root</Breadcrumb.Step>
         {folders.map(name => (
-            <Breadcrumb.Step key={name} href={`${url.substring(0, url.indexOf(name))}${name}`}>
-              {name}
-            </Breadcrumb.Step>
-          )
-        )}
+          <Breadcrumb.Step key={name} href={`#${url.substring(0, url.indexOf(name))}${name}`}>
+            {name}
+          </Breadcrumb.Step>
+        ))}
       </Breadcrumb>
       <NodeSummary report={currentNode} />
       <Table>

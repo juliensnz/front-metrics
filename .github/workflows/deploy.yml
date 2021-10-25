@@ -1,0 +1,49 @@
+name: Deploy to GitHub pages
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  master:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the current branch
+        uses: actions/checkout@v2
+
+      - name: Install node 13.13 for the rest of the workflow
+        uses: actions/setup-node@v1
+        with:
+          node-version: 15.14
+
+      - name: Install node modules
+        run: yarn install
+
+      - name: Checkout community repo
+        uses: actions/checkout@v2
+        with:
+            repository: akeneo/pim-community-dev
+            path: code/community
+
+      - name: Checkout enterprise repo
+        uses: actions/checkout@v2
+        with:
+            repository: akeneo/pim-enterprise-dev
+            path: code/enterprise
+            token: ${{ secrets.TOCKEN_FOR_ENTERPRISE }}
+
+      - name: Generate report
+        run: bin/console report:generate ./code
+
+      - name: Build CRA
+        run: yarn run build
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          keep_files: false
+          exclude_assets: ''

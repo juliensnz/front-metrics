@@ -8,9 +8,18 @@ const FILES_TO_EXCLUDE = [
     '.config.js',
     'setupJest.ts',
     'test-utils.tsx',
-    '.eslintrc.js'];
+    '.eslintrc.js',
+    'setupTests.ts'
+  ];
 const FOLDERS_TO_EXCLUDE = [
     'node_modules',
+    'cypress',
+    'tests',
+    '.github',
+    '.storybook',
+    'frontend/build',
+    'frontend/test',
+    'frontend/webpack',
     '__tests__',
     '__mocks__'
 ];
@@ -35,7 +44,19 @@ const buildNodeMetrics = (directoryPath, sourceFolder) => {
     const files = fs.readdirSync(directoryPath);
 
     return files.reduce((accumulator, node) => {
-        const metric = fs.statSync(directoryPath + '/' + node).isDirectory() ?
+        let isDirectory = false;
+
+        try {
+          const stats = fs.statSync(directoryPath + '/' + node)
+          isDirectory = stats.isDirectory();
+
+        } catch (error) {
+          console.log(`Warning: failed to get stats on "${directoryPath}/${node}"`);
+
+          return accumulator;
+        }
+
+        const metric = isDirectory ?
             buildDirectoryMetric(directoryPath, node, sourceFolder):
             buildFileMetric(directoryPath, node, sourceFolder);
 
@@ -51,19 +72,20 @@ const buildNodeMetrics = (directoryPath, sourceFolder) => {
 }
 
 const buildDirectoryMetric = (directoryPath, directoryName, sourceFolder) => {
-    const childrenNode = buildNodeMetrics(directoryPath + '/' + directoryName, sourceFolder);
+    const currentPath = `${directoryPath}/${directoryName}`;
+    const childrenNode = buildNodeMetrics(currentPath, sourceFolder);
     const directoryIsEmpty = Object.keys(childrenNode).length === 0;
     if (directoryIsEmpty) {
         return null;
     }
-    if (FOLDERS_TO_EXCLUDE.includes(directoryName)) {
+    if (FOLDERS_TO_EXCLUDE.includes(directoryName) || FOLDERS_TO_EXCLUDE.some((folderToExclude) => currentPath.includes(folderToExclude))) {
         return null;
     }
 
     const nodeMetrics = {
         type: 'directory',
         directoryPath: directoryPath,
-        path: directoryPath + '/' + directoryName,
+        path: currentPath,
         name: directoryName,
         children: childrenNode,
         metrics: calculateChildrenMetrics(childrenNode),
