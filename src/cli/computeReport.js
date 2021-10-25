@@ -24,6 +24,8 @@ const FOLDERS_TO_EXCLUDE = [
     '__mocks__'
 ];
 
+var execSync = require('child_process').execSync;
+
 const fs = require('fs');
 const path = require('path');
 
@@ -143,9 +145,13 @@ const getFileMetrics = (filePath) => {
         -1 !== fileContent.indexOf(`className='Akn`) ||
         -1 !== fileContent.indexOf(`className={\`Akn`)) ? 1 : 0;
 
+    const loc = parseInt(execSync(`wc -l ${filePath}`).toString().trim());
+
     return {
         typescript: isTypescript ? 1 : 0,
         javascript: isJavascript ? 1 : 0,
+        typescriptLOC: isTypescript ? loc : 0,
+        javascriptLOC: isJavascript ? loc : 0,
         requireInJavascript,
         requireInTypescript,
         defineInJavascript,

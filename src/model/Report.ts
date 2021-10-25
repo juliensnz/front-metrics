@@ -1,6 +1,8 @@
 type ReportMetric = {
   typescript: number;
+  typescriptLOC: number;
   javascript: number;
+  javascriptLOC: number;
   requireInJavascript: number;
   requireInTypescript: number;
   defineInJavascript: number;
@@ -17,18 +19,18 @@ type Report = {
   metrics: ReportMetric;
 } & (
   | {
-  type: 'directory';
-  children: {
-    [key: string]: Report;
-  };
-}
+      type: 'directory';
+      children: {
+        [key: string]: Report;
+      };
+    }
   | {
-  type: 'file';
-  }
+      type: 'file';
+    }
 );
 
 const getReportFromFolder = (report: Report, folders: string[]): Report => {
-  if (0 === folders.length || folders.every((folder) => folder === '')) {
+  if (0 === folders.length || folders.every(folder => folder === '')) {
     return report;
   }
 
