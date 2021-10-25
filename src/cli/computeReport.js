@@ -8,9 +8,15 @@ const FILES_TO_EXCLUDE = [
     '.config.js',
     'setupJest.ts',
     'test-utils.tsx',
-    '.eslintrc.js'];
+    '.eslintrc.js',
+    'setupTests.ts'
+  ];
 const FOLDERS_TO_EXCLUDE = [
     'node_modules',
+    'cypress',
+    'tests',
+    '.github',
+    '.storybook',
     '__tests__',
     '__mocks__'
 ];
@@ -35,7 +41,19 @@ const buildNodeMetrics = (directoryPath, sourceFolder) => {
     const files = fs.readdirSync(directoryPath);
 
     return files.reduce((accumulator, node) => {
-        const metric = fs.statSync(directoryPath + '/' + node).isDirectory() ?
+        let isDirectory = false;
+
+        try {
+          const stats = fs.statSync(directoryPath + '/' + node)
+          isDirectory = stats.isDirectory();
+
+        } catch (error) {
+          console.log(`Warning: failed to get stats on "${directoryPath}/${node}"`);
+
+          return accumulator;
+        }
+
+        const metric = isDirectory ?
             buildDirectoryMetric(directoryPath, node, sourceFolder):
             buildFileMetric(directoryPath, node, sourceFolder);
 
