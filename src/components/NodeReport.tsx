@@ -1,10 +1,25 @@
-import {Badge, Breadcrumb, CopyIcon, FileIcon, FolderIcon, IconButton, Table} from 'akeneo-design-system';
+import {
+  Badge,
+  Breadcrumb,
+  CopyIcon,
+  Dropdown,
+  FileIcon,
+  FolderIcon,
+  IconButton,
+  SwitcherButton,
+  Table,
+  useBooleanState,
+} from 'akeneo-design-system';
 import {Link, useRouteMatch} from 'react-router-dom';
 import styled from 'styled-components';
 import {getReportFromFolder, Report} from '../model/Report';
 import {NodeSummary} from './NodeSummary';
 import {ColoredCell, getLevelForRatio} from './ColorCell';
 import {useSortedChildren} from '../hooks/useSortedChildren';
+
+const Header = styled.div`
+  display: flex;
+`;
 
 const canCopyToClipboard = (): boolean => 'clipboard' in navigator;
 
@@ -23,15 +38,19 @@ const Spacer = styled.div`
 
 type NodeReportProps = {
   report: Report;
+  reportName: string | null;
+  reports: string[];
+  onReportChange: (newReport: string) => void;
 };
 
-const NodeReport = ({report}: NodeReportProps) => {
+const NodeReport = ({report, reportName, reports, onReportChange}: NodeReportProps) => {
   const {url} = useRouteMatch();
   const folders = url.split('/').slice(1);
   const currentNode = getReportFromFolder(report, folders);
   const [sortedChildren, computeDirection, handleDirectionChange] = useSortedChildren(
     'file' === currentNode.type ? [] : Object.values(currentNode.children)
   );
+  const [isDropdownOpen, openDropdown, closeDropdown] = useBooleanState();
 
   if ('file' === currentNode.type) {
     return null;
@@ -39,14 +58,42 @@ const NodeReport = ({report}: NodeReportProps) => {
 
   return (
     <>
-      <Breadcrumb>
-        <Breadcrumb.Step href="#/">Root</Breadcrumb.Step>
-        {folders.map(name => (
-          <Breadcrumb.Step key={name} href={`#${url.substring(0, url.indexOf(name))}${name}`}>
-            {name}
-          </Breadcrumb.Step>
-        ))}
-      </Breadcrumb>
+      <Header>
+        <Breadcrumb>
+          <Breadcrumb.Step href="#/">Root</Breadcrumb.Step>
+          {folders.map(name => (
+            <Breadcrumb.Step key={name} href={`#${url.substring(0, url.indexOf(name))}${name}`}>
+              {name}
+            </Breadcrumb.Step>
+          ))}
+        </Breadcrumb>
+        <Spacer />
+        <Dropdown>
+          <SwitcherButton label="Report" onClick={openDropdown}>
+            {reportName}
+          </SwitcherButton>
+          {isDropdownOpen && (
+            <Dropdown.Overlay verticalPosition="down" onClose={closeDropdown}>
+              <Dropdown.Header>
+                <Dropdown.Title>Reports</Dropdown.Title>
+              </Dropdown.Header>
+              <Dropdown.ItemCollection>
+                {reports.map(reportName => (
+                  <Dropdown.Item
+                    key={reportName}
+                    onClick={() => {
+                      onReportChange(reportName);
+                      closeDropdown();
+                    }}
+                  >
+                    {reportName}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.ItemCollection>
+            </Dropdown.Overlay>
+          )}
+        </Dropdown>
+      </Header>
       <NodeSummary report={currentNode} />
       <Table>
         <Table.Header sticky={0}>
