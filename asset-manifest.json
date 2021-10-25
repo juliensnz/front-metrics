@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.js": "/front-metrics/static/js/main.af301145.chunk.js",
-    "main.js.map": "/front-metrics/static/js/main.af301145.chunk.js.map",
+    "main.js": "/front-metrics/static/js/main.2b078367.chunk.js",
+    "main.js.map": "/front-metrics/static/js/main.2b078367.chunk.js.map",
     "runtime-main.js": "/front-metrics/static/js/runtime-main.730c4f69.js",
     "runtime-main.js.map": "/front-metrics/static/js/runtime-main.730c4f69.js.map",
     "static/css/2.8e4e8e1f.chunk.css": "/front-metrics/static/css/2.8e4e8e1f.chunk.css",
-    "static/js/2.4be4ad02.chunk.js": "/front-metrics/static/js/2.4be4ad02.chunk.js",
-    "static/js/2.4be4ad02.chunk.js.map": "/front-metrics/static/js/2.4be4ad02.chunk.js.map",
+    "static/js/2.83d17994.chunk.js": "/front-metrics/static/js/2.83d17994.chunk.js",
+    "static/js/2.83d17994.chunk.js.map": "/front-metrics/static/js/2.83d17994.chunk.js.map",
     "index.html": "/front-metrics/index.html",
     "static/css/2.8e4e8e1f.chunk.css.map": "/front-metrics/static/css/2.8e4e8e1f.chunk.css.map",
-    "static/js/2.4be4ad02.chunk.js.LICENSE.txt": "/front-metrics/static/js/2.4be4ad02.chunk.js.LICENSE.txt",
+    "static/js/2.83d17994.chunk.js.LICENSE.txt": "/front-metrics/static/js/2.83d17994.chunk.js.LICENSE.txt",
     "static/media/AddingValue.svg": "/front-metrics/static/media/AddingValue.6a8e7f29.svg",
     "static/media/AkeneoCloudEdition.svg": "/front-metrics/static/media/AkeneoCloudEdition.1bfce34f.svg",
     "static/media/Api.svg": "/front-metrics/static/media/Api.51825e98.svg",
@@ -73,7 +73,7 @@
   "entrypoints": [
     "static/js/runtime-main.730c4f69.js",
     "static/css/2.8e4e8e1f.chunk.css",
-    "static/js/2.4be4ad02.chunk.js",
-    "static/js/main.af301145.chunk.js"
+    "static/js/2.83d17994.chunk.js",
+    "static/js/main.2b078367.chunk.js"
   ]
 }
