@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - tryToOrder
   schedule:
     - cron: '0 0 * * *'
 

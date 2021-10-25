@@ -45,8 +45,6 @@ This app is deployed every night at midnight using master for both community and
 
 # Todo
 
-- LOC counter for typescript/javascript
-- finish ordering
 - add details for each metrics
 - change colors on file metrics
 -
