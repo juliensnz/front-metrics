@@ -42,3 +42,11 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 ## Deployment
 
 This app is deployed every night at midnight using master for both community and enterprise
+
+# Todo
+
+- LOC counter for typescript/javascript
+- finish ordering
+- add details for each metrics
+- change colors on file metrics
+-

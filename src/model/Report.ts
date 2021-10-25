@@ -1,18 +1,20 @@
+type ReportMetric = {
+  typescript: number;
+  javascript: number;
+  requireInJavascript: number;
+  requireInTypescript: number;
+  defineInJavascript: number;
+  reactClassComponent: number;
+  bemInTypescript: number;
+  reactController: number;
+  backboneController: number;
+};
+
 type Report = {
   directoryPath: string;
   path: string;
   name: string;
-  metrics: {
-    typescript: number;
-    javascript: number;
-    requireInJavascript: number;
-    requireInTypescript: number;
-    defineInJavascript: number;
-    reactClassComponent: number;
-    bemInTypescript: number;
-    reactController: number;
-    backboneController: number;
-  };
+  metrics: ReportMetric;
 } & (
   | {
   type: 'directory';
@@ -39,4 +41,4 @@ const getReportFromFolder = (report: Report, folders: string[]): Report => {
 };
 
 export {getReportFromFolder};
-export type {Report};
+export type {Report, ReportMetric};

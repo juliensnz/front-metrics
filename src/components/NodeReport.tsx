@@ -12,8 +12,10 @@ import {
 } from 'akeneo-design-system';
 import {Link, useRouteMatch} from 'react-router-dom';
 import styled from 'styled-components';
-import {getReportFromFolder, Report} from '../model/Report';
+import {getReportFromFolder, Report, ReportMetric} from '../model/Report';
 import {NodeSummary} from './NodeSummary';
+import {useMemo} from 'react';
+import {useStorageState} from '../hooks/useStorageState';
 
 const canCopyToClipboard = (): boolean => 'clipboard' in navigator;
 
@@ -48,10 +50,59 @@ type NodeReportProps = {
   report: Report;
 };
 
+type SortDirection = 'none' | 'ascending' | 'descending';
+
 const NodeReport = ({report}: NodeReportProps) => {
   const {url} = useRouteMatch();
   const folders = url.split('/').slice(1);
   const currentNode = getReportFromFolder(report, folders);
+  const [sortedColumn, setSortedColumn] = useStorageState<{
+    columnName: keyof ReportMetric | null;
+    sortDirection: SortDirection;
+  }>(
+    {
+      columnName: null,
+      sortDirection: 'none',
+    },
+    'sort_state'
+  );
+
+  const computeDirection = (columnName: string) => {
+    if (columnName !== sortedColumn.columnName) {
+      return 'none';
+    }
+
+    return sortedColumn.sortDirection;
+  };
+
+  const handleDirectionChange = (columnName: keyof ReportMetric) => (sortDirection: SortDirection) => {
+    setSortedColumn({
+      columnName: columnName,
+      sortDirection: sortDirection,
+    });
+  };
+
+  const sortChildren = (children: Report[], columnName: keyof ReportMetric | null, direction: SortDirection) => {
+    if (columnName === null) {
+      return children;
+    }
+
+    return [...children].sort((a, b) => {
+      return direction === 'ascending'
+        ? a.metrics[columnName] - b.metrics[columnName]
+        : b.metrics[columnName] - a.metrics[columnName];
+    });
+  };
+
+  const sortedChildren = useMemo(
+    () =>
+      sortChildren(
+        Object.values('file' === currentNode.type ? [] : currentNode.children),
+        sortedColumn.columnName,
+        sortedColumn.sortDirection
+      ),
+    [sortedColumn, currentNode]
+  );
 
   if ('file' === currentNode.type) {
     return null;
@@ -72,15 +123,51 @@ const NodeReport = ({report}: NodeReportProps) => {
         <Table.Header sticky={0}>
           <Table.HeaderCell>Name</Table.HeaderCell>
           <Table.HeaderCell>Typescript ratio</Table.HeaderCell>
-          <Table.HeaderCell>Require in typescript</Table.HeaderCell>
-          <Table.HeaderCell>Number of legacy files</Table.HeaderCell>
-          <Table.HeaderCell>React classes</Table.HeaderCell>
-          <Table.HeaderCell>BEM in typescript</Table.HeaderCell>
-          <Table.HeaderCell>Legacy bridges</Table.HeaderCell>
-          <Table.HeaderCell>Backbone controllers</Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('requireInTypescript')}
+            sortDirection={computeDirection('requireInTypescript')}
+          >
+            Require in typescript
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('defineInJavascript')}
+            sortDirection={computeDirection('defineInJavascript')}
+          >
+            Number of legacy files
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('reactClassComponent')}
+            sortDirection={computeDirection('reactClassComponent')}
+          >
+            React classes
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('bemInTypescript')}
+            sortDirection={computeDirection('bemInTypescript')}
+          >
+            BEM in typescript
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('reactController')}
+            sortDirection={computeDirection('reactController')}
+          >
+            Legacy bridges
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('backboneController')}
+            sortDirection={computeDirection('backboneController')}
+          >
+            Backbone controllers
+          </Table.HeaderCell>
         </Table.Header>
         <Table.Body>
-          {Object.values(currentNode.children).map(child => {
+          {sortedChildren.map(child => {
             const childUrl = '/' === url ? `/${child.name}` : `${url}/${child.name}`;
             const percentFormatter = new Intl.NumberFormat('en-US', {
               style: 'percent',
