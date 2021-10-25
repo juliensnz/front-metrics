@@ -12,6 +12,8 @@ import {
 } from 'akeneo-design-system';
 import {Link, useRouteMatch} from 'react-router-dom';
 import styled from 'styled-components';
+import {getReportFromFolder, Report} from "../model/Report";
+import {NodeSummary} from "./NodeSummary";
 
 const canCopyToClipboard = (): boolean => 'clipboard' in navigator;
 
@@ -20,11 +22,8 @@ const copyToClipboard = (text: string) => canCopyToClipboard() && navigator.clip
 const getLevelForRatio = (ratio: number): [Level, number] => {
   if (ratio < 0.4) return ['danger', 40];
   if (ratio < 0.6) return ['danger', 20];
-
   if (ratio < 0.8) return ['warning', 40];
-
   if (ratio < 0.95) return ['warning', 20];
-
   if (ratio < 1) return ['primary', 20];
 
   return ['primary', 40];
@@ -45,57 +44,14 @@ const Spacer = styled.div`
   flex: 1;
 `;
 
-type Report = {
-  directoryPath: string;
-  path: string;
-  name: string;
-  metrics: {
-    typescript: number;
-    javascript: number;
-    requireInJavascript: number;
-    requireInTypescript: number;
-    defineInJavascript: number;
-    reactClassComponent: number;
-    bemInTypescript: number;
-    reactController: number;
-    backboneController: number;
-  };
-} & (
-  | {
-      type: 'directory';
-      children: {
-        [key: string]: Report;
-      };
-    }
-  | {
-      type: 'file';
-    }
-);
-
-const getNode = (report: Report, folders: string[]): Report => {
-  if (0 === folders.length) {
-    return report;
-  }
-
-  const firstFolder = folders.shift();
-
-  if ('' === firstFolder) {
-    return getNode(report, folders);
-  }
-
-  if ('file' === report.type || undefined === firstFolder) {
-    return report;
-  }
-
-  return getNode(report.children[firstFolder], folders);
-};
-
 type NodeReportProps = {
   report: Report;
 };
+
 const NodeReport = ({report}: NodeReportProps) => {
   const {url} = useRouteMatch();
-  const currentNode = getNode(report, url.split('/'));
+  const folders = url.split('/').slice(1);
+  const currentNode = getReportFromFolder(report, folders);
 
   if ('file' === currentNode.type) {
     return null;
@@ -104,18 +60,17 @@ const NodeReport = ({report}: NodeReportProps) => {
   return (
     <>
       <Breadcrumb>
-        {url.split('/').map(name =>
-          '' === name ? (
-            <Breadcrumb.Step key={name} href="/">
-              Root
-            </Breadcrumb.Step>
-          ) : (
+        <Breadcrumb.Step href="/">
+          Root
+        </Breadcrumb.Step>
+        {folders.map(name => (
             <Breadcrumb.Step key={name} href={`${url.substring(0, url.indexOf(name))}${name}`}>
               {name}
             </Breadcrumb.Step>
           )
         )}
       </Breadcrumb>
+      <NodeSummary report={currentNode} />
       <Table>
         <Table.Header sticky={0}>
           <Table.HeaderCell>Name</Table.HeaderCell>
@@ -130,8 +85,7 @@ const NodeReport = ({report}: NodeReportProps) => {
         <Table.Body>
           {Object.values(currentNode.children).map(child => {
             const childUrl = '/' === url ? `/${child.name}` : `${url}/${child.name}`;
-            console.log(child);
-            const percentFormater = new Intl.NumberFormat('en-US', {
+            const percentFormatter = new Intl.NumberFormat('en-US', {
               style: 'percent',
               minimumFractionDigits: 2,
             });
@@ -150,7 +104,7 @@ const NodeReport = ({report}: NodeReportProps) => {
                     onClick={() => copyToClipboard(child.path)}
                   />
                   <Spacer />
-                  <Badge>{child.metrics.javascript + child.metrics.typescript}</Badge>
+                  {'directory' === child.type && <Badge>{child.metrics.javascript + child.metrics.typescript}</Badge>}
                 </SpacedCell>
                 <ColoredCell
                   color={getLevelForRatio(
@@ -158,7 +112,7 @@ const NodeReport = ({report}: NodeReportProps) => {
                   )}
                   title={`${child.metrics.typescript} / ${child.metrics.javascript + child.metrics.typescript}`}
                 >
-                  {percentFormater.format(
+                  {percentFormatter.format(
                     child.metrics.typescript / (child.metrics.javascript + child.metrics.typescript)
                   )}{' '}
                   ({child.metrics.javascript} javascript files)
