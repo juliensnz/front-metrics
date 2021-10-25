@@ -1,0 +1,52 @@
+#!/usr/bin/env node
+const yargs = require('yargs');
+const fs = require('fs');
+
+const {computeReport} = require('../src/cli/computeReport');
+
+const {_: commandName, folderToAnalyze, $0: binaryPath} = yargs
+  .command('report:generate [folderToAnalyze]', 'Generate a new report to be anlyzed', yargs => {
+    yargs.positional('folderToAnalyze', {
+      describe: 'The folder you want to analyze',
+      require: true,
+    });
+  })
+  .check((argv) => {
+    switch (argv._[0]) {
+      case 'report:generate':
+        if (undefined === argv.folderToAnalyze) {
+          throw new Error('The folderToAnalyze argument is required');
+        }
+
+        if (!fs.existsSync(argv.folderToAnalyze)) {
+          throw new Error(`Folder "${argv.folderToAnalyze}" does not exists`);
+        }
+        break;
+      default:
+        break;
+    }
+
+    return true;
+  })
+  .help('h')
+  .alias('h', 'help')
+  .demandCommand(2).argv;
+
+
+(async () => {
+  try {
+    switch (commandName[0]) {
+      case 'report:generate':
+        const report = computeReport(folderToAnalyze);
+
+        fs.writeFileSync('./src/reports/report.json', JSON.stringify(report))
+        break;
+
+      default:
+        console.error(`Command "${commandName[0]}" does not exist`)
+        break;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+})();
