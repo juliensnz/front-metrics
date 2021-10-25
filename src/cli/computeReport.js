@@ -17,6 +17,9 @@ const FOLDERS_TO_EXCLUDE = [
     'tests',
     '.github',
     '.storybook',
+    'frontend/build',
+    'frontend/test',
+    'frontend/webpack',
     '__tests__',
     '__mocks__'
 ];
@@ -69,19 +72,20 @@ const buildNodeMetrics = (directoryPath, sourceFolder) => {
 }
 
 const buildDirectoryMetric = (directoryPath, directoryName, sourceFolder) => {
-    const childrenNode = buildNodeMetrics(directoryPath + '/' + directoryName, sourceFolder);
+    const currentPath = `${directoryPath}/${directoryName}`;
+    const childrenNode = buildNodeMetrics(currentPath, sourceFolder);
     const directoryIsEmpty = Object.keys(childrenNode).length === 0;
     if (directoryIsEmpty) {
         return null;
     }
-    if (FOLDERS_TO_EXCLUDE.includes(directoryName)) {
+    if (FOLDERS_TO_EXCLUDE.includes(directoryName) || FOLDERS_TO_EXCLUDE.some((folderToExclude) => currentPath.includes(folderToExclude))) {
         return null;
     }
 
     const nodeMetrics = {
         type: 'directory',
         directoryPath: directoryPath,
-        path: directoryPath + '/' + directoryName,
+        path: currentPath,
         name: directoryName,
         children: childrenNode,
         metrics: calculateChildrenMetrics(childrenNode),

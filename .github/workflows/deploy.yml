@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - github-action
   schedule:
     - cron: '0 0 * * *'
 
