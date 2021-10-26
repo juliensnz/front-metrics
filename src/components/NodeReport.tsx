@@ -1,37 +1,29 @@
 import {
-  AkeneoThemedProps,
   Badge,
   Breadcrumb,
   CopyIcon,
+  Dropdown,
   FileIcon,
   FolderIcon,
-  getColorForLevel,
   IconButton,
-  Level,
+  SwitcherButton,
   Table,
+  useBooleanState,
 } from 'akeneo-design-system';
 import {Link, useRouteMatch} from 'react-router-dom';
 import styled from 'styled-components';
 import {getReportFromFolder, Report} from '../model/Report';
 import {NodeSummary} from './NodeSummary';
+import {ColoredCell, getLevelForRatio} from './ColorCell';
+import {useSortedChildren} from '../hooks/useSortedChildren';
+
+const Header = styled.div`
+  display: flex;
+`;
 
 const canCopyToClipboard = (): boolean => 'clipboard' in navigator;
 
 const copyToClipboard = (text: string) => canCopyToClipboard() && navigator.clipboard.writeText(text);
-
-const getLevelForRatio = (ratio: number): [Level, number] => {
-  if (ratio < 0.4) return ['danger', 40];
-  if (ratio < 0.6) return ['danger', 20];
-  if (ratio < 0.8) return ['warning', 40];
-  if (ratio < 0.95) return ['warning', 20];
-  if (ratio < 1) return ['primary', 20];
-
-  return ['primary', 40];
-};
-
-const ColoredCell = styled(Table.Cell)<{color: [Level, number]} & AkeneoThemedProps>`
-  background-color: ${({color: [level, gradient]}) => getColorForLevel(level, gradient)};
-`;
 
 const SpacedCell = styled(Table.Cell)`
   & > div {
@@ -46,12 +38,19 @@ const Spacer = styled.div`
 
 type NodeReportProps = {
   report: Report;
+  reportName: string | null;
+  reports: string[];
+  onReportChange: (newReport: string) => void;
 };
 
-const NodeReport = ({report}: NodeReportProps) => {
+const NodeReport = ({report, reportName, reports, onReportChange}: NodeReportProps) => {
   const {url} = useRouteMatch();
   const folders = url.split('/').slice(1);
   const currentNode = getReportFromFolder(report, folders);
+  const [sortedChildren, computeDirection, handleDirectionChange] = useSortedChildren(
+    'file' === currentNode.type ? [] : Object.values(currentNode.children)
+  );
+  const [isDropdownOpen, openDropdown, closeDropdown] = useBooleanState();
 
   if ('file' === currentNode.type) {
     return null;
@@ -59,28 +58,99 @@ const NodeReport = ({report}: NodeReportProps) => {
 
   return (
     <>
-      <Breadcrumb>
-        <Breadcrumb.Step href="#/">Root</Breadcrumb.Step>
-        {folders.map(name => (
-          <Breadcrumb.Step key={name} href={`#${url.substring(0, url.indexOf(name))}${name}`}>
-            {name}
-          </Breadcrumb.Step>
-        ))}
-      </Breadcrumb>
+      <Header>
+        <Breadcrumb>
+          <Breadcrumb.Step href="#/">Root</Breadcrumb.Step>
+          {folders.map(name => (
+            <Breadcrumb.Step key={name} href={`#${url.substring(0, url.indexOf(name))}${name}`}>
+              {name}
+            </Breadcrumb.Step>
+          ))}
+        </Breadcrumb>
+        <Spacer />
+        <Dropdown>
+          <SwitcherButton label="Report" onClick={openDropdown}>
+            {reportName}
+          </SwitcherButton>
+          {isDropdownOpen && (
+            <Dropdown.Overlay verticalPosition="down" onClose={closeDropdown}>
+              <Dropdown.Header>
+                <Dropdown.Title>Reports</Dropdown.Title>
+              </Dropdown.Header>
+              <Dropdown.ItemCollection>
+                {reports.map(reportName => (
+                  <Dropdown.Item
+                    key={reportName}
+                    onClick={() => {
+                      onReportChange(reportName);
+                      closeDropdown();
+                    }}
+                  >
+                    {reportName}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.ItemCollection>
+            </Dropdown.Overlay>
+          )}
+        </Dropdown>
+      </Header>
       <NodeSummary report={currentNode} />
       <Table>
         <Table.Header sticky={0}>
-          <Table.HeaderCell>Name</Table.HeaderCell>
-          <Table.HeaderCell>Typescript ratio</Table.HeaderCell>
-          <Table.HeaderCell>Require in typescript</Table.HeaderCell>
-          <Table.HeaderCell>Number of legacy files</Table.HeaderCell>
-          <Table.HeaderCell>React classes</Table.HeaderCell>
-          <Table.HeaderCell>BEM in typescript</Table.HeaderCell>
-          <Table.HeaderCell>Legacy bridges</Table.HeaderCell>
-          <Table.HeaderCell>Backbone controllers</Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('name')}
+            sortDirection={computeDirection('name')}
+          >
+            Name
+          </Table.HeaderCell>
+          <Table.HeaderCell>Typescript ratio (File)</Table.HeaderCell>
+          <Table.HeaderCell>Typescript ratio (LOC)</Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('requireInTypescript')}
+            sortDirection={computeDirection('requireInTypescript')}
+          >
+            Require in typescript
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('defineInJavascript')}
+            sortDirection={computeDirection('defineInJavascript')}
+          >
+            Number of legacy files
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('reactClassComponent')}
+            sortDirection={computeDirection('reactClassComponent')}
+          >
+            React classes
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('bemInTypescript')}
+            sortDirection={computeDirection('bemInTypescript')}
+          >
+            BEM in typescript
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('reactController')}
+            sortDirection={computeDirection('reactController')}
+          >
+            Legacy bridges
+          </Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('backboneController')}
+            sortDirection={computeDirection('backboneController')}
+          >
+            Backbone controllers
+          </Table.HeaderCell>
         </Table.Header>
         <Table.Body>
-          {Object.values(currentNode.children).map(child => {
+          {sortedChildren.map(child => {
             const childUrl = '/' === url ? `/${child.name}` : `${url}/${child.name}`;
             const percentFormatter = new Intl.NumberFormat('en-US', {
               style: 'percent',
@@ -101,7 +171,12 @@ const NodeReport = ({report}: NodeReportProps) => {
                     onClick={() => copyToClipboard(child.path)}
                   />
                   <Spacer />
-                  {'directory' === child.type && <Badge>{child.metrics.javascript + child.metrics.typescript}</Badge>}
+                  {'directory' === child.type && (
+                    <Badge>
+                      {child.metrics.javascriptLOC + child.metrics.typescriptLOC} |{' '}
+                      {child.metrics.javascript + child.metrics.typescript}
+                    </Badge>
+                  )}
                 </SpacedCell>
                 <ColoredCell
                   color={getLevelForRatio(
@@ -113,6 +188,19 @@ const NodeReport = ({report}: NodeReportProps) => {
                     child.metrics.typescript / (child.metrics.javascript + child.metrics.typescript)
                   )}{' '}
                   ({child.metrics.javascript} javascript files)
+                </ColoredCell>
+                <ColoredCell
+                  color={getLevelForRatio(
+                    child.metrics.typescriptLOC / (child.metrics.javascriptLOC + child.metrics.typescriptLOC)
+                  )}
+                  title={`${child.metrics.typescriptLOC} / ${
+                    child.metrics.javascriptLOC + child.metrics.typescriptLOC
+                  }`}
+                >
+                  {percentFormatter.format(
+                    child.metrics.typescriptLOC / (child.metrics.javascriptLOC + child.metrics.typescriptLOC)
+                  )}{' '}
+                  ({child.metrics.javascriptLOC} javascript LOC)
                 </ColoredCell>
                 <ColoredCell color={[0 < child.metrics.requireInTypescript ? 'danger' : 'primary', 40]}>
                   {child.metrics.requireInTypescript}

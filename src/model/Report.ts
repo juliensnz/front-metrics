@@ -1,32 +1,36 @@
+type ReportMetric = {
+  typescript: number;
+  typescriptLOC: number;
+  javascript: number;
+  javascriptLOC: number;
+  requireInJavascript: number;
+  requireInTypescript: number;
+  defineInJavascript: number;
+  reactClassComponent: number;
+  bemInTypescript: number;
+  reactController: number;
+  backboneController: number;
+};
+
 type Report = {
   directoryPath: string;
   path: string;
   name: string;
-  metrics: {
-    typescript: number;
-    javascript: number;
-    requireInJavascript: number;
-    requireInTypescript: number;
-    defineInJavascript: number;
-    reactClassComponent: number;
-    bemInTypescript: number;
-    reactController: number;
-    backboneController: number;
-  };
+  metrics: ReportMetric;
 } & (
   | {
-  type: 'directory';
-  children: {
-    [key: string]: Report;
-  };
-}
+      type: 'directory';
+      children: {
+        [key: string]: Report;
+      };
+    }
   | {
-  type: 'file';
-  }
+      type: 'file';
+    }
 );
 
 const getReportFromFolder = (report: Report, folders: string[]): Report => {
-  if (0 === folders.length || folders.every((folder) => folder === '')) {
+  if (0 === folders.length || folders.every(folder => folder === '')) {
     return report;
   }
 
@@ -39,4 +43,4 @@ const getReportFromFolder = (report: Report, folders: string[]): Report => {
 };
 
 export {getReportFromFolder};
-export type {Report};
+export type {Report, ReportMetric};

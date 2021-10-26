@@ -21,6 +21,10 @@ jobs:
       - name: Install node modules
         run: yarn install
 
+      - name: Generate report name
+        run: echo "::set-output name=report_name::$(date +%s)"
+        id: generate_report_name
+
       - name: Checkout community repo
         uses: actions/checkout@v2
         with:
@@ -35,7 +39,7 @@ jobs:
             token: ${{ secrets.TOCKEN_FOR_ENTERPRISE }}
 
       - name: Generate report
-        run: bin/console report:generate ./code
+        run: bin/console report:generate ./code ${{steps.generate_report_name.outputs.report_name}}
 
       - name: Build CRA
         run: yarn run build
@@ -45,5 +49,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
-          keep_files: false
+          keep_files: true
           exclude_assets: ''
