@@ -36,14 +36,28 @@ const {_: commandName, folderToAnalyze, reportName, $0: binaryPath} = yargs
   .alias('h', 'help')
   .demandCommand(2).argv;
 
+
+const aggregateReports = (path) => {
+  const files = fs.readdirSync(path);
+
+  const aggregatedReports = files.filter(path => path.includes('.json')).map(file => {
+    const fileContent = fs.readFileSync(`${path}${file}`);
+    const report = JSON.parse(fileContent);
+
+    delete report.children;
+
+    return report;
+  });
+
+  fs.writeFileSync(`${path}../reports.json`, JSON.stringify(aggregatedReports));
+}
+
+
 (async () => {
   try {
     switch (commandName[0]) {
       case 'report:generate':
-        const report = computeReport(folderToAnalyze);
-        fs.writeFileSync(`./public/reports/${reportName}.json`, JSON.stringify(report))
-        if (true) {
-//      if (process.env.CI === 'true') {
+        if (process.env.CI === 'true') {
           const response = await fetch('https://api.github.com/repos/juliensnz/front-metrics/contents/reports?ref=gh-pages');
           const reportResponse = await response.json();
 
@@ -55,13 +69,11 @@ const {_: commandName, folderToAnalyze, reportName, $0: binaryPath} = yargs
           }));
         }
 
-          // Aggregé les données dans reports.json
-          //date +%F
-        const files = fs.readdirSync('./public/reports/');
-        fs.writeFileSync(`./public/reports/reports.json`, JSON.stringify(
-          files.filter(path => path.includes('.json') && path !== 'reports.json')
-            .map(path => path.replace('.json', ''))
-          ))
+        const report = computeReport(folderToAnalyze, reportName);
+        fs.writeFileSync(`./public/reports/${reportName}.json`, JSON.stringify(report))
+
+        aggregateReports('./public/reports/');
+
         break;
 
       default:
