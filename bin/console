@@ -4,14 +4,18 @@ const fs = require('fs');
 
 const {computeReport} = require('../src/cli/computeReport');
 
-const {_: commandName, folderToAnalyze, reportName, $0: binaryPath} = yargs
-  .command('report:generate [folderToAnalyze] [reportName]', 'Generate a new report to be anlyzed', yargs => {
+const {_: commandName, folderToAnalyze, reportName, date, $0: binaryPath} = yargs
+  .command('report:generate [folderToAnalyze] [reportName] [date]', 'Generate a new report to be anlyzed', yargs => {
     yargs.positional('folderToAnalyze', {
       describe: 'The folder you want to analyze',
       require: true,
     }).positional('reportName', {
       describe: 'The report name you want',
       default: 'report',
+      require: false,
+    }).positional('date', {
+      describe: 'The report name you want',
+      default: Date.now(),
       require: false,
     });
   })
@@ -41,7 +45,7 @@ const {_: commandName, folderToAnalyze, reportName, $0: binaryPath} = yargs
   try {
     switch (commandName[0]) {
       case 'report:generate':
-        const report = computeReport(folderToAnalyze);
+        const report = computeReport(new Date(date), folderToAnalyze);
 
         fs.writeFileSync(`./public/reports/${reportName}.json`, JSON.stringify(report))
 

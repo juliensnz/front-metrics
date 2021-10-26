@@ -12,10 +12,11 @@ import {
 } from 'akeneo-design-system';
 import {Link, useRouteMatch} from 'react-router-dom';
 import styled from 'styled-components';
-import {getReportFromFolder, Report} from '../model/Report';
+import {getNodeReportFromPath, Report} from '../model/Report';
 import {NodeSummary} from './NodeSummary';
 import {ColoredCell, getLevelForRatio} from './ColorCell';
 import {useSortedChildren} from '../hooks/useSortedChildren';
+import {NodeCharts} from "./NodeCharts";
 
 const Header = styled.div`
   display: flex;
@@ -39,14 +40,16 @@ const Spacer = styled.div`
 type NodeReportProps = {
   report: Report;
   reportName: string | null;
-  reports: string[];
+  reports: Report[];
+  reportNames: string[];
   onReportChange: (newReport: string) => void;
 };
 
-const NodeReport = ({report, reportName, reports, onReportChange}: NodeReportProps) => {
+const NodeReport = ({report, reportName, reports, reportNames, onReportChange}: NodeReportProps) => {
   const {url} = useRouteMatch();
-  const folders = url.split('/').slice(1);
-  const currentNode = getReportFromFolder(report, folders);
+  const path = url.substring(1);
+  const folders = path.split('/');
+  const currentNode = getNodeReportFromPath(report, path);
   const [sortedChildren, computeDirection, handleDirectionChange] = useSortedChildren(
     'file' === currentNode.type ? [] : Object.values(currentNode.children)
   );
@@ -78,7 +81,7 @@ const NodeReport = ({report, reportName, reports, onReportChange}: NodeReportPro
                 <Dropdown.Title>Reports</Dropdown.Title>
               </Dropdown.Header>
               <Dropdown.ItemCollection>
-                {reports.map(reportName => (
+                {reportNames.map(reportName => (
                   <Dropdown.Item
                     key={reportName}
                     onClick={() => {
@@ -94,7 +97,7 @@ const NodeReport = ({report, reportName, reports, onReportChange}: NodeReportPro
           )}
         </Dropdown>
       </Header>
-      <NodeSummary report={currentNode} />
+      <NodeSummary nodeReport={currentNode} />
       <Table>
         <Table.Header sticky={0}>
           <Table.HeaderCell
@@ -219,6 +222,7 @@ const NodeReport = ({report, reportName, reports, onReportChange}: NodeReportPro
           })}
         </Table.Body>
       </Table>
+      <NodeCharts reports={reports} path={path} />
     </>
   );
 };

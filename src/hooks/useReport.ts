@@ -4,15 +4,16 @@ import {Report} from '../model/Report';
 const useReport = () => {
   const [currentReportName, setCurrentReportName] = useState<string | null>(null);
   const [currentReport, setCurrentReport] = useState<Report | null>(null);
-  const [reports, setReports] = useState<string[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [reportNames, setReportNames] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
       const response = await fetch('./reports/reports.json');
-      const reports = await response.json();
+      const reportNames = await response.json();
 
-      setReports(reports);
-      setCurrentReportName(reports[0]);
+      setReportNames(reportNames);
+      setCurrentReportName(reportNames[0]);
     })();
   }, []);
 
@@ -26,7 +27,20 @@ const useReport = () => {
     })();
   }, [currentReportName]);
 
-  return [currentReport, currentReportName, reports, setCurrentReportName] as const;
+
+  useEffect(() => {
+    if (0 === reportNames.length) return;
+
+    (async () => {
+      const reports = await Promise.all<Report>(reportNames.map(reportName =>
+        fetch(`./reports/${reportName}.json`).then(resp => resp.json())
+      ));
+
+      setReports(reports);
+    })();
+  }, [reportNames]);
+
+  return [currentReport, currentReportName, reportNames, reports, setCurrentReportName] as const;
 };
 
 export {useReport};

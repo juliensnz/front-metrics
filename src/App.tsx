@@ -3,7 +3,7 @@ import {NodeReport} from './components/NodeReport';
 import {useReport} from './hooks/useReport';
 
 const App = () => {
-  const [report, reportName, reports, handleReportChange] = useReport();
+  const [report, reportName, reportNames, reports, handleReportChange] = useReport();
 
   if (null === report) {
     return <div>Loading</div>;
@@ -13,10 +13,10 @@ const App = () => {
     <HashRouter>
       <Switch>
         <Route exact path="/:path+/">
-          <NodeReport report={report} reports={reports} reportName={reportName} onReportChange={handleReportChange} />
+          <NodeReport report={report} reportNames={reportNames} reports={reports} reportName={reportName} onReportChange={handleReportChange} />
         </Route>
         <Route exact path="/">
-          <NodeReport report={report} reports={reports} reportName={reportName} onReportChange={handleReportChange} />
+          <NodeReport report={report} reportNames={reportNames} reports={reports} reportName={reportName} onReportChange={handleReportChange} />
         </Route>
       </Switch>
     </HashRouter>

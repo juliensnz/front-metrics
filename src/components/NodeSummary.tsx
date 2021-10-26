@@ -11,7 +11,7 @@ import {
   Level,
   RefreshIcon,
 } from 'akeneo-design-system';
-import {Report} from '../model/Report';
+import {NodeReport} from '../model/Report';
 import styled from 'styled-components';
 import {getLevelForRatio} from './ColorCell';
 
@@ -29,10 +29,10 @@ const ColoredIconCard = styled(IconCard)<{color: [Level, number]} & AkeneoThemed
 `;
 
 type NodeSummaryProps = {
-  report: Report;
+  nodeReport: NodeReport;
 };
 
-const NodeSummary = ({report}: NodeSummaryProps) => {
+const NodeSummary = ({nodeReport}: NodeSummaryProps) => {
   const percentFormatter = new Intl.NumberFormat('en-US', {
     style: 'percent',
     minimumFractionDigits: 2,
@@ -41,48 +41,48 @@ const NodeSummary = ({report}: NodeSummaryProps) => {
   return (
     <NodeSummaryContainer>
       <ColoredIconCard
-        color={getLevelForRatio(report.metrics.typescript / (report.metrics.javascript + report.metrics.typescript))}
+        color={getLevelForRatio(nodeReport.metrics.typescript / (nodeReport.metrics.javascript + nodeReport.metrics.typescript))}
         label={percentFormatter.format(
-          report.metrics.typescript / (report.metrics.javascript + report.metrics.typescript)
+          nodeReport.metrics.typescript / (nodeReport.metrics.javascript + nodeReport.metrics.typescript)
         )}
         icon={<ActivityIcon />}
         content="Typescript ratio"
       />
       <ColoredIconCard
         color={getLevelForRatio(
-          report.metrics.typescriptLOC / (report.metrics.javascriptLOC + report.metrics.typescriptLOC)
+          nodeReport.metrics.typescriptLOC / (nodeReport.metrics.javascriptLOC + nodeReport.metrics.typescriptLOC)
         )}
-        label={report.metrics.requireInTypescript.toString()}
+        label={nodeReport.metrics.requireInTypescript.toString()}
         icon={<AttributeLinkIcon />}
         content="Require in typescript"
       />
       <ColoredIconCard
-        color={[0 < report.metrics.requireInTypescript ? 'danger' : 'primary', 60]}
-        label={report.metrics.defineInJavascript.toString()}
+        color={[0 < nodeReport.metrics.requireInTypescript ? 'danger' : 'primary', 60]}
+        label={nodeReport.metrics.defineInJavascript.toString()}
         icon={<AssociateIcon />}
         content="Number of legacy files"
       />
       <ColoredIconCard
-        color={[0 < report.metrics.requireInTypescript ? 'danger' : 'primary', 60]}
-        label={report.metrics.reactClassComponent.toString()}
+        color={[0 < nodeReport.metrics.requireInTypescript ? 'danger' : 'primary', 60]}
+        label={nodeReport.metrics.reactClassComponent.toString()}
         icon={<RefreshIcon />}
         content="React classes"
       />
       <ColoredIconCard
-        color={[0 < report.metrics.bemInTypescript ? 'danger' : 'primary', 60]}
-        label={report.metrics.bemInTypescript.toString()}
+        color={[0 < nodeReport.metrics.bemInTypescript ? 'danger' : 'primary', 60]}
+        label={nodeReport.metrics.bemInTypescript.toString()}
         icon={<EntityMultiIcon />}
         content="BEM in typescript"
       />
       <ColoredIconCard
-        color={[0 < report.metrics.reactController ? 'danger' : 'primary', 60]}
-        label={report.metrics.reactController.toString()}
+        color={[0 < nodeReport.metrics.reactController ? 'danger' : 'primary', 60]}
+        label={nodeReport.metrics.reactController.toString()}
         icon={<FactoryIcon />}
         content="Legacy bridges"
       />
       <ColoredIconCard
-        color={[0 < report.metrics.backboneController ? 'danger' : 'primary', 60]}
-        label={report.metrics.backboneController.toString()}
+        color={[0 < nodeReport.metrics.backboneController ? 'danger' : 'primary', 60]}
+        label={nodeReport.metrics.backboneController.toString()}
         icon={<ComponentIcon />}
         content="Backbone controllers"
       />

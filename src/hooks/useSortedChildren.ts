@@ -1,10 +1,10 @@
 import {useMemo} from 'react';
-import {Report, ReportMetric} from '../model/Report';
+import {NodeReport, ReportMetric} from '../model/Report';
 import {useStorageState} from './useStorageState';
 
 type SortDirection = 'none' | 'ascending' | 'descending';
 
-const useSortedChildren = (children: Report[]) => {
+const useSortedChildren = (children: NodeReport[]) => {
   const [sortedColumn, setSortedColumn] = useStorageState<{
     columnName: keyof ReportMetric | 'name' | null;
     sortDirection: SortDirection;
@@ -31,7 +31,7 @@ const useSortedChildren = (children: Report[]) => {
     });
   };
 
-  const sortChildren = (children: Report[], columnName: keyof ReportMetric | 'name' | null, direction: SortDirection) => {
+  const sortChildren = (children: NodeReport[], columnName: keyof ReportMetric | 'name' | null, direction: SortDirection) => {
     if (columnName === null) {
       return children;
     }

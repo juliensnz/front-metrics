@@ -12,24 +12,34 @@ type ReportMetric = {
   backboneController: number;
 };
 
-type Report = {
-  directoryPath: string;
-  path: string;
-  name: string;
-  metrics: ReportMetric;
-} & (
+type NodeReport = {
+    directoryPath: string;
+    path: string;
+    name: string;
+    metrics: ReportMetric;
+  } & (
   | {
-      type: 'directory';
-      children: {
-        [key: string]: Report;
-      };
-    }
-  | {
-      type: 'file';
-    }
+    type: 'directory';
+    children: {
+      [key: string]: NodeReport;
+    };
+  } | {
+    type: 'file';
+  }
 );
 
-const getReportFromFolder = (report: Report, folders: string[]): Report => {
+type Report = {
+  creationDate: number;
+  nodeReport: NodeReport;
+};
+
+const getNodeReportFromPath = (report: Report, path: string): NodeReport => {
+  const folders = path.split('/');
+
+  return getReportFromFolder(report.nodeReport, folders);
+}
+
+const getReportFromFolder = (report: NodeReport, folders: string[]): NodeReport => {
   if (0 === folders.length || folders.every(folder => folder === '')) {
     return report;
   }
@@ -42,5 +52,5 @@ const getReportFromFolder = (report: Report, folders: string[]): Report => {
   return getReportFromFolder(report.children[currentFolder], otherFolders);
 };
 
-export {getReportFromFolder};
-export type {Report, ReportMetric};
+export {getNodeReportFromPath, getReportFromFolder};
+export type {Report, NodeReport, ReportMetric};
