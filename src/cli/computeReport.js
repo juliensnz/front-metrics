@@ -167,9 +167,8 @@ const getFileMetrics = (filePath) => {
 const computeReport = (sourceFolder) => {
   const directoryPath = path.dirname(sourceFolder);
   const directoryName = path.parse(sourceFolder).base;
-  const nodeMetrics = buildDirectoryMetric(directoryPath, directoryName, sourceFolder);
 
-  return nodeMetrics;
+  return buildDirectoryMetric(directoryPath, directoryName, sourceFolder);
 }
 
 module.exports = {computeReport}

@@ -6,7 +6,7 @@ type SortDirection = 'none' | 'ascending' | 'descending';
 
 const useSortedChildren = (children: Report[]) => {
   const [sortedColumn, setSortedColumn] = useStorageState<{
-    columnName: keyof ReportMetric | null;
+    columnName: keyof ReportMetric | 'name' | null;
     sortDirection: SortDirection;
   }>(
     {
@@ -24,16 +24,24 @@ const useSortedChildren = (children: Report[]) => {
     return sortedColumn.sortDirection;
   };
 
-  const handleDirectionChange = (columnName: keyof ReportMetric) => (sortDirection: SortDirection) => {
+  const handleDirectionChange = (columnName: keyof ReportMetric | 'name') => (sortDirection: SortDirection) => {
     setSortedColumn({
       columnName: columnName,
       sortDirection: sortDirection,
     });
   };
 
-  const sortChildren = (children: Report[], columnName: keyof ReportMetric | null, direction: SortDirection) => {
+  const sortChildren = (children: Report[], columnName: keyof ReportMetric | 'name' | null, direction: SortDirection) => {
     if (columnName === null) {
       return children;
+    }
+
+    if (columnName === 'name') {
+      return [...children].sort((a, b) => {
+        return direction === 'ascending'
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      });
     }
 
     return [...children].sort((a, b) => {

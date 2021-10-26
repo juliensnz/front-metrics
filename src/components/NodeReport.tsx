@@ -97,7 +97,13 @@ const NodeReport = ({report, reportName, reports, onReportChange}: NodeReportPro
       <NodeSummary report={currentNode} />
       <Table>
         <Table.Header sticky={0}>
-          <Table.HeaderCell>Name</Table.HeaderCell>
+          <Table.HeaderCell
+            isSortable={true}
+            onDirectionChange={handleDirectionChange('name')}
+            sortDirection={computeDirection('name')}
+          >
+            Name
+          </Table.HeaderCell>
           <Table.HeaderCell>Typescript ratio (File)</Table.HeaderCell>
           <Table.HeaderCell>Typescript ratio (LOC)</Table.HeaderCell>
           <Table.HeaderCell
