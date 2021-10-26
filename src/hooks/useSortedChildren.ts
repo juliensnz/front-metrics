@@ -31,16 +31,18 @@ const useSortedChildren = (children: Report[]) => {
     });
   };
 
-  const sortChildren = (children: Report[], columnName: keyof ReportMetric | 'name' | null, direction: SortDirection) => {
+  const sortChildren = (
+    children: Report[],
+    columnName: keyof ReportMetric | 'name' | null,
+    direction: SortDirection
+  ) => {
     if (columnName === null) {
       return children;
     }
 
     if (columnName === 'name') {
       return [...children].sort((a, b) => {
-        return direction === 'ascending'
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name);
+        return direction === 'ascending' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
       });
     }
 

@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - handlemultireport
   schedule:
     - cron: '0 0 * * *'
 
@@ -13,16 +14,16 @@ jobs:
       - name: Checkout the current branch
         uses: actions/checkout@v2
 
-      - name: Install node 13.13 for the rest of the workflow
+      - name: Install node 14.18 for the rest of the workflow
         uses: actions/setup-node@v1
         with:
-          node-version: 15.14
+          node-version: 14.18
 
       - name: Install node modules
         run: yarn install
 
       - name: Generate report name
-        run: echo "::set-output name=report_name::$(date +%s)"
+        run: echo "::set-output name=report_name::$(date +%F)"
         id: generate_report_name
 
       - name: Checkout community repo
@@ -39,7 +40,7 @@ jobs:
             token: ${{ secrets.TOCKEN_FOR_ENTERPRISE }}
 
       - name: Generate report
-        run: bin/console report:generate ./code ${{steps.generate_report_name.outputs.report_name}}
+        run: yarn report:generate ./code ${{steps.generate_report_name.outputs.report_name}}
 
       - name: Build CRA
         run: yarn run build

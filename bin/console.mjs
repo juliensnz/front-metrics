@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-const yargs = require('yargs');
-const fs = require('fs');
-
-const {computeReport} = require('../src/cli/computeReport');
+import yargs from 'yargs';
+import fetch from 'node-fetch';
+import fs from 'fs';
+import {computeReport} from '../src/cli/computeReport.js';
 
 const {_: commandName, folderToAnalyze, reportName, $0: binaryPath} = yargs
   .command('report:generate [folderToAnalyze] [reportName]', 'Generate a new report to be anlyzed', yargs => {
@@ -37,19 +37,43 @@ const {_: commandName, folderToAnalyze, reportName, $0: binaryPath} = yargs
   .demandCommand(2).argv;
 
 
+const aggregateReports = (path) => {
+  const files = fs.readdirSync(path);
+
+  const aggregatedReports = files.filter(path => path.includes('.json')).map(file => {
+    const fileContent = fs.readFileSync(`${path}${file}`);
+    const report = JSON.parse(fileContent);
+
+    delete report.children;
+
+    return report;
+  });
+
+  fs.writeFileSync(`${path}../reports.json`, JSON.stringify(aggregatedReports));
+}
+
+
 (async () => {
   try {
     switch (commandName[0]) {
       case 'report:generate':
-        const report = computeReport(folderToAnalyze);
+        if (process.env.CI === 'true') {
+          const response = await fetch('https://api.github.com/repos/juliensnz/front-metrics/contents/reports?ref=gh-pages');
+          const reportResponse = await response.json();
 
+          const reportFiles = reportResponse.filter((report) => !['.gitkeep', 'reports.json'].includes(report.name));
+          await Promise.all(reportFiles.map(async (reportFile) => {
+            const reportContent = await fetch(reportFile.download_url);
+
+            fs.writeFileSync(`./public/reports/${reportFile.name}`, await reportContent.text());
+          }));
+        }
+
+        const report = computeReport(folderToAnalyze, reportName);
         fs.writeFileSync(`./public/reports/${reportName}.json`, JSON.stringify(report))
 
-        const files = fs.readdirSync('./public/reports/');
-        fs.writeFileSync(`./public/reports/reports.json`, JSON.stringify(
-          files.filter(path => path.includes('.json') && path !== 'reports.json')
-            .map(path => path.replace('.json', ''))
-          ))
+        aggregateReports('./public/reports/');
+
         break;
 
       default:

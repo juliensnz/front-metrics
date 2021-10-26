@@ -12,6 +12,10 @@ type ReportMetric = {
   backboneController: number;
 };
 
+type ReportRoot = Report & {
+  reportName: string;
+};
+
 type Report = {
   directoryPath: string;
   path: string;
@@ -43,4 +47,4 @@ const getReportFromFolder = (report: Report, folders: string[]): Report => {
 };
 
 export {getReportFromFolder};
-export type {Report, ReportMetric};
+export type {Report, ReportMetric, ReportRoot};

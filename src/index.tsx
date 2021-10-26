@@ -12,6 +12,10 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+if (0 !== window.location.hash.indexOf('#/')) {
+  window.location.href = `${window.location.href}/#/`;
+}
+
 ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={onboarderTheme}>

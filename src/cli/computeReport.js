@@ -93,7 +93,6 @@ const buildDirectoryMetric = (directoryPath, directoryName, sourceFolder) => {
         metrics: calculateChildrenMetrics(childrenNode),
     };
 
-
     return nodeMetrics;
 }
 
@@ -164,11 +163,14 @@ const getFileMetrics = (filePath) => {
 
 
 
-const computeReport = (sourceFolder) => {
+const computeReport = (sourceFolder, name) => {
   const directoryPath = path.dirname(sourceFolder);
   const directoryName = path.parse(sourceFolder).base;
 
-  return buildDirectoryMetric(directoryPath, directoryName, sourceFolder);
+  const report = buildDirectoryMetric(directoryPath, directoryName, sourceFolder);
+  report.reportName = name;
+
+  return report;
 }
 
 module.exports = {computeReport}

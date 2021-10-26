@@ -1,18 +1,18 @@
 import {useEffect, useState} from 'react';
-import {Report} from '../model/Report';
+import {ReportRoot} from '../model/Report';
 
 const useReport = () => {
   const [currentReportName, setCurrentReportName] = useState<string | null>(null);
-  const [currentReport, setCurrentReport] = useState<Report | null>(null);
-  const [reports, setReports] = useState<string[]>([]);
+  const [currentReport, setCurrentReport] = useState<ReportRoot | null>(null);
+  const [reports, setReports] = useState<ReportRoot[]>([]);
 
   useEffect(() => {
     (async () => {
-      const response = await fetch('./reports/reports.json');
+      const response = await fetch('./reports.json');
       const reports = await response.json();
 
       setReports(reports);
-      setCurrentReportName(reports[0]);
+      setCurrentReportName(reports[0].reportName);
     })();
   }, []);
 

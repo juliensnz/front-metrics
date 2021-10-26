@@ -10,7 +10,7 @@ This project is intended to explore Akeneo PIM codebase.
 
 ### Locale env
 
-    bin/console report:generate PATH_YOU_WANT_TO_AUDIT
+    yarn report:generate PATH_YOU_WANT_TO_AUDIT
     yarn start
 
 ### Online

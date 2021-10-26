@@ -12,7 +12,7 @@ import {
 } from 'akeneo-design-system';
 import {Link, useRouteMatch} from 'react-router-dom';
 import styled from 'styled-components';
-import {getReportFromFolder, Report} from '../model/Report';
+import {getReportFromFolder, Report, ReportRoot} from '../model/Report';
 import {NodeSummary} from './NodeSummary';
 import {ColoredCell, getLevelForRatio} from './ColorCell';
 import {useSortedChildren} from '../hooks/useSortedChildren';
@@ -39,7 +39,7 @@ const Spacer = styled.div`
 type NodeReportProps = {
   report: Report;
   reportName: string | null;
-  reports: string[];
+  reports: ReportRoot[];
   onReportChange: (newReport: string) => void;
 };
 
@@ -61,7 +61,7 @@ const NodeReport = ({report, reportName, reports, onReportChange}: NodeReportPro
       <Header>
         <Breadcrumb>
           <Breadcrumb.Step href="#/">Root</Breadcrumb.Step>
-          {folders.map(name => (
+          {folders.map((name: string) => (
             <Breadcrumb.Step key={name} href={`#${url.substring(0, url.indexOf(name))}${name}`}>
               {name}
             </Breadcrumb.Step>
@@ -78,15 +78,15 @@ const NodeReport = ({report, reportName, reports, onReportChange}: NodeReportPro
                 <Dropdown.Title>Reports</Dropdown.Title>
               </Dropdown.Header>
               <Dropdown.ItemCollection>
-                {reports.map(reportName => (
+                {reports.map(report => (
                   <Dropdown.Item
-                    key={reportName}
+                    key={report.reportName}
                     onClick={() => {
-                      onReportChange(reportName);
+                      onReportChange(report.reportName);
                       closeDropdown();
                     }}
                   >
-                    {reportName}
+                    {report.reportName}
                   </Dropdown.Item>
                 ))}
               </Dropdown.ItemCollection>
